@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.profiprog</groupId>
+	<artifactId>profiprog-pom</artifactId>
+	<version>0.1</version>
+	<packaging>pom</packaging>
+
+	<name>Parent POM for ProfiProg projects</name>
+
+	<description>
+		Global settings for ProfiProg projects.
+	</description>
+	
+	<properties>
+		<projectSiteBasedir>${env.PROJECT_SITE_BASEDIR}</projectSiteBasedir>
+		<projectRepositoryBasedir>${env.PROJECT_REPOSITORY_BASEDIR}</projectRepositoryBasedir>
+		<profiprog.siteRepository>file://${projectSiteBasedir}/${project.artifactId}</profiprog.siteRepository>
+		<profiprog.releaseRepository>file://${projectRepositoryBasedir}</profiprog.releaseRepository>
+		<profiprog.snapshotRepository>dav:http://maven/nexus/content/repositories/snapshots</profiprog.snapshotRepository>
+	</properties>
+
+	<organization>
+		<name>ProfiProg</name>
+		<url>http://profiprog.com/</url>
+	</organization>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Build-Number>${build.number}</Build-Number>
+							<Build-Timestamp>${build.timestamp}</Build-Timestamp>
+							<Organization>${organization.name} (${organization.url})</Organization>
+							<Project-Page>${project.url}</Project-Page>
+							<Revision-Number>${build.revision} (last changed ${build.commitRevision})</Revision-Number>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Build-Number>${build.number}</Build-Number>
+							<Build-Timestamp>${build.timestamp}</Build-Timestamp>
+							<Organization>${organization.name} (${organization.url})</Organization>
+							<Project-Page>${project.url}</Project-Page>
+							<Revision-Number>${build.revision} (last changed ${build.commitRevision})</Revision-Number>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<issueManagement>
+		<system>Issues</system>
+		<url>http://code.google.com/p/profiprog/issues/list</url>
+	</issueManagement>
+
+	<distributionManagement>
+		<site>
+			<id>local</id>
+			<name>Site on file system</name>
+			<url>${profiprog.siteRepository}</url>
+		</site>
+		<repository>
+			<id>profiprog.com</id>
+			<name>ProfiProg releases repository</name>
+			<url>${profiprog.releaseRepository}</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven</id>
+			<name>ProfiProg snapshot repository</name>
+			<url>${profiprog.snapshotRepository}</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
+	</distributionManagement>
+</project>
