@@ -1,0 +1,4 @@
+<module>
+	<source path="common"/>
+	<inherits name="com.adaptiweb.utils.commons.Param"/>
+</module>
