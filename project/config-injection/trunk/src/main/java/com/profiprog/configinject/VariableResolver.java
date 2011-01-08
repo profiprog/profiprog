@@ -78,27 +78,31 @@ public final class VariableResolver implements VariableSource {
 		if (string == null) return null;
 		if (string.indexOf('$') == -1) return string;
 
-		LinkedList<String> trace = evaluatingDynamicProperties.get();
 		StringBuffer sb = new StringBuffer(string.length());
 		Matcher m = VARIABLE_REFERENCE_PATTERN.matcher(string);
 		
 		while (m.find()) {
 			String variableName = m.group(m.group(1) == null ? 2 : 1);
 			
-			if (trace.contains(variableName)) throw circularSubstitutionError(trace, variableName);
-			trace.addLast(variableName);
-			
-			String variableValue = "$".equals(variableName) ? "$" : resolveValue(variableName);
+			String variableValue = "$".equals(variableName) ? "$" : resolveValueWithTracing(variableName);
 			if (variableValue == null) throw new IllegalStateException("Missing property " + variableName);
 			m.appendReplacement(sb, variableValue.replace("\\", "\\\\").replace("$", "\\$"));
-			
-			trace.removeLast();
 		}
 		m.appendTail(sb);
 		
-		if(trace.size() == 0) evaluatingDynamicProperties.remove();
-		
 		return sb.toString();
+	}
+	
+	private String resolveValueWithTracing(String variableName) {
+		LinkedList<String> trace = evaluatingDynamicProperties.get();
+		if (trace.contains(variableName)) throw circularSubstitutionError(trace, variableName);
+		trace.addLast(variableName);
+		try {
+			return resolveValue(variableName);
+		} finally {
+			trace.removeLast();
+			if(trace.size() == 0) evaluatingDynamicProperties.remove();
+		}
 	}
 
 	private IllegalStateException circularSubstitutionError(LinkedList<String> trace, String key) {
@@ -138,7 +142,7 @@ public final class VariableResolver implements VariableSource {
 	}
 	
 	/**
-	 * Resolve all variables in keys and values of given map. 
+	 * Resolve all variables in values of given map. 
 	 * @param map
 	 * @return new map with resolved variables.
 	 */

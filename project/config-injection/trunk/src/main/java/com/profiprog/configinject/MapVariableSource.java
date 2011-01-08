@@ -3,6 +3,8 @@ package com.profiprog.configinject;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.profiprog.configinject.util.MapParser;
+
 public class MapVariableSource implements VariableSource {
 	
 	private final Map<String, String> map;
@@ -13,6 +15,10 @@ public class MapVariableSource implements VariableSource {
 	
 	public MapVariableSource() {
 		this(new HashMap<String, String>());
+	}
+
+	public MapVariableSource(String string) {
+		map = MapParser.parseMap(string);
 	}
 
 	@Override
