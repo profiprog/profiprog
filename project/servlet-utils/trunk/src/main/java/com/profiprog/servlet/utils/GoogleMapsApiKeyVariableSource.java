@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.profiprog.configinject.InicializableVariableSource;
 import com.profiprog.configinject.VariableResolver;
@@ -45,8 +45,6 @@ public class GoogleMapsApiKeyVariableSource implements InicializableVariableSour
 
 	public String variableName = "googleMaps.apiKey";
 
-	@Autowired HttpServletRequest request;
-
 	private VariableResolver variables;
 
 	@Override
@@ -55,13 +53,19 @@ public class GoogleMapsApiKeyVariableSource implements InicializableVariableSour
 			return null;
 
 		if (this.variableName.equals(variableName)) {
-			String serverName = normalizeDomainName(request.getServerName());
+			String serverName = normalizeDomainName(resolveRequest().getServerName());
 			String property = variableName + "." + serverName;
 			String result = variables.resolveValue(property, "");
 			logger.info("Api key for server name '{}' is {}", serverName, result.length() == 0 ? "${" + property + "}" : result);
 			return result;
 		} else
 			return null;
+	}
+
+	protected final HttpServletRequest resolveRequest() {
+		if (RequestContextHolder.getRequestAttributes() instanceof ServletRequestAttributes)
+			return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		throw new IllegalStateException("Unable to resoleve current instance of HttpServletRequest!");
 	}
 
 	@Override

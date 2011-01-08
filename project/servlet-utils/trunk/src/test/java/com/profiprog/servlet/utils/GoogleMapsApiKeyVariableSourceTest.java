@@ -16,19 +16,17 @@ import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.profiprog.configinject.VariableResolver;
 import com.profiprog.configinject.VariableSource;
-import com.profiprog.servlet.utils.GoogleMapsApiKeyVariableSource;
 
 
 public class GoogleMapsApiKeyVariableSourceTest {
 
 	@Mock VariableSource variableSource;
 	@Mock HttpServletRequest servletRequest;
-	@Mock RequestAttributes requestAttributes;
 	private VariableResolver variableResolver;
 
 	public GoogleMapsApiKeyVariableSource initializedGoogleMapsApiKeyVariableSource() throws IOException, NoSuchFieldException {
@@ -37,23 +35,20 @@ public class GoogleMapsApiKeyVariableSourceTest {
 
 		assertNotNull(variableSource);
 		assertNotNull(servletRequest);
-		assertNotNull(requestAttributes);
 
 		result.initSource(variableResolver = new VariableResolver(variableSource));
-		result.request = servletRequest;
-		RequestContextHolder.setRequestAttributes(requestAttributes);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(servletRequest));
 		return result;
 	}
 
 	@After
 	public void releseMock() {
 		if (variableResolver != null) {
-			verifyNoMoreInteractions(variableSource, servletRequest, requestAttributes);
+			verifyNoMoreInteractions(variableSource, servletRequest);
 			RequestContextHolder.resetRequestAttributes();
 			variableResolver = null;
 			variableSource = null;
 			servletRequest = null;
-			requestAttributes = null;
 		}
 	}
 
