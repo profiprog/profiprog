@@ -17,8 +17,9 @@
 	</properties>
 
 	<scm>
-		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/servlet-utils/trunk</developerConnection>
-		<url>http://localhost/svn/profiprog/project/servlet-utils/trunk</url>
+		<connection>scm:svn:${profiProgSVN}/project/servlet-utils/trunk</connection>
+		<developerConnection>scm:svn:${profiProgSVN}/project/servlet-utils/trunk</developerConnection>
+		<url>${profiProgSVN}/project/servlet-utils/trunk</url>
 	</scm>
 
 	<build>

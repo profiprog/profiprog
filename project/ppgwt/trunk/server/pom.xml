@@ -13,7 +13,7 @@
 	<name>ProfiProg GWT server</name>
 
 	<properties>
-		<springVersion>[3.*,4.*)</springVersion>
+		<springVersion>[3.0,4.0)</springVersion>
 		<slf4jVersion>1.6.1</slf4jVersion>
 	</properties>
 

@@ -13,6 +13,7 @@
 	<name>Symple Evenet System for Java</name>
 	
 	<scm>
+		<connection>scm:svn:${profiProgSVN}/project/jses/trunk</connection>
 		<developerConnection>scm:svn:${profiProgSVN}/project/jses/trunk</developerConnection>
 		<url>${profiProgSVN}/project/jses/trunk</url>
 	</scm>
