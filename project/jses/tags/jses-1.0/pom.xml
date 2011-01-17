@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.profiprog</groupId>
+		<artifactId>profiprog-pom</artifactId>
+		<version>0.2</version>
+	</parent>
+	<artifactId>jses</artifactId>
+	<version>1.0</version>
+	<packaging>jar</packaging>
+
+	<name>Symple Evenet System for Java</name>
+	
+	<scm>
+		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/jses/tags/jses-1.0</developerConnection>
+		<url>http://localhost/svn/profiprog/project/jses/tags/jses-1.0</url>
+	</scm>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.0</version>
+				<configuration>
+					<tagBase>${profiProgSVN}/project/jses/tags</tagBase>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>[3.0,4.0)</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
+</project>
