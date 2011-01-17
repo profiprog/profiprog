@@ -8,13 +8,12 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>config-injection</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<name>Config injection</name>
 
 	<scm>
-		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/config-injection/tags/config-injection-1.0</developerConnection>
-		<tag>HEAD</tag>
-		<url>http://localhost/svn/profiprog/project/config-injection/tags/config-injection-1.0</url>
+		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/config-injection/trunk</developerConnection>
+		<url>http://localhost/svn/profiprog/project/config-injection/trunk</url>
 	</scm>
 
 	<build>
