@@ -16,7 +16,7 @@
 	</description>
 	
 	<properties>
-                <profiProgSVN>https://profiprog.googlecode.com/svn</profiProgSVN>
+		<profiProgSVN>https://profiprog.googlecode.com/svn</profiProgSVN>
 		<projectSiteBasedir>${env.PROJECT_SITE_BASEDIR}</projectSiteBasedir>
 		<projectRepositoryBasedir>${env.PROJECT_REPOSITORY_BASEDIR}</projectRepositoryBasedir>
 		<profiprog.siteRepository>file://${projectSiteBasedir}/${project.artifactId}</profiprog.siteRepository>
@@ -82,6 +82,13 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-webdav</artifactId>
+				<version>1.0-beta-2</version>
+			</extension>
+		</extensions>
 	</build>
 	
 	<issueManagement>

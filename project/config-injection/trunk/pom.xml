@@ -12,8 +12,8 @@
 	<name>Config injection</name>
 
 	<scm>
-		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/config-injection/trunk</developerConnection>
-		<url>http://localhost/svn/profiprog/project/config-injection/trunk</url>
+		<developerConnection>scm:svn:${profiProgSVN}/project/config-injection/trunk</developerConnection>
+		<url>${profiProgSVN}/project/config-injection/trunk</url>
 	</scm>
 
 	<build>
