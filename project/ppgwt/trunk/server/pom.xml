@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>ppgwt-server</artifactId>
-	<name>ProfiProg GWT server</name>
+	<name>ProfiProg GWT Server</name>
 
 	<properties>
 		<springVersion>[3.0,4.0)</springVersion>
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ppgwt-common</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>

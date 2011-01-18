@@ -9,13 +9,13 @@
 	</parent>
 	
 	<artifactId>ppgwt-client</artifactId>
-	<name>ProfiProg GWT client</name>
+	<name>ProfiProg GWT Client</name>
 	
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>ppgwt-common</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
