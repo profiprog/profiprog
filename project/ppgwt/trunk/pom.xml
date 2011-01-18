@@ -4,7 +4,7 @@
 
 	<groupId>com.profiprog</groupId>
 	<artifactId>ppgwt</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>ProfiProg GWT</name>
@@ -32,9 +32,9 @@
 	</properties>
 
 	<scm>
-		<connection>scm:svn:http://localhost/svn/profiprog/project/ppgwt/tags/ppgwt-1.0</connection>
-		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/ppgwt/tags/ppgwt-1.0</developerConnection>
-		<url>http://localhost/svn/profiprog/project/ppgwt/tags/ppgwt-1.0</url>
+		<connection>scm:svn:http://localhost/svn/profiprog/project/ppgwt/trunk</connection>
+		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/ppgwt/trunk</developerConnection>
+		<url>http://localhost/svn/profiprog/project/ppgwt/trunk</url>
 	</scm>
 
 	<build>
