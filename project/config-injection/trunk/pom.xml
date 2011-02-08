@@ -32,6 +32,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.profiprog</groupId>
+			<artifactId>jses</artifactId>
+			<version>[1.0,)</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>

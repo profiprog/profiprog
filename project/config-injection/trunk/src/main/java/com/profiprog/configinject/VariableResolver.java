@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  * This class also implements {@link VariableSource} and it allows simply define
  * multi variable sources in one.
  */
-public final class VariableResolver implements VariableSource {
+public final class VariableResolver implements ChangeableVariableSource {
 
 	private final VariableSource[] sources;
 	
@@ -204,6 +204,19 @@ public final class VariableResolver implements VariableSource {
 				return properties.getProperty(variableName);
 			}
 		};
+	}
+
+	@Override
+	public void setVariableSourceChangeHandler(final VariableSourceChangeHandler changeHandler) {
+		VariableSourceChangeHandler handler = new VariableSourceChangeHandler() {
+			@Override
+			public void notifyVariableSourceChange(ChangeableVariableSource changedSource) {
+				changeHandler.notifyVariableSourceChange(VariableResolver.this);
+			}
+		};
+		for (VariableSource source : sources)
+			if (source instanceof ChangeableVariableSource)
+				((ChangeableVariableSource) source).setVariableSourceChangeHandler(handler);
 	}
 
 }

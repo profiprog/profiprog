@@ -11,12 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import com.profiprog.configinject.LiveFile.FileLoader;
 
-public class PropertyFileVariableSource implements InicializableVariableSource, FileLoader {
+public class PropertyFileVariableSource implements InicializableVariableSource, ChangeableVariableSource, FileLoader {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PropertyFileVariableSource.class);
 	
 	private final AtomicReference<Properties> properties = new AtomicReference<Properties>();
 	private final LiveFileHandler fileHandler = new LiveFileHandler();
+
+	private VariableSourceChangeHandler changeHandler;
 
 	public void setPropertyFileName(String fileName) {
 		fileHandler.setPropertyFile(fileName);
@@ -40,6 +42,8 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	public void loadFile(File file) throws IOException {
 		logger.info("Loading configuration from {}", file);
 		properties.set(new Properties(file));
+		if (changeHandler != null)
+			changeHandler.notifyVariableSourceChange(this);
 	}
 
 	@Override
@@ -63,6 +67,11 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 			}
 		}
 		return result;
+	}
+
+	@Override
+	public void setVariableSourceChangeHandler(VariableSourceChangeHandler changeHandler) {
+		this.changeHandler = changeHandler; 
 	}
 
 }
