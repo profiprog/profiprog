@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.profiprog</groupId>
 			<artifactId>config-injection</artifactId>
-			<version>1.0</version>
+			<version>[1.0,)</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
