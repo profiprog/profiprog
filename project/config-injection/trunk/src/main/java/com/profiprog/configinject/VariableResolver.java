@@ -10,12 +10,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.util.StringValueResolver;
+
 /**
- * Provides method {@link #replaceVariables(String)} for replacing variables in string.
+ * Provides method {@link #resolveStringValue(String)} for replacing variables in string.
  * This class also implements {@link VariableSource} and it allows simply define
  * multi variable sources in one.
  */
-public final class VariableResolver implements ChangeableVariableSource {
+public final class VariableResolver implements ChangeableVariableSource, StringValueResolver {
 
 	private final VariableSource[] sources;
 	
@@ -74,7 +76,8 @@ public final class VariableResolver implements ChangeableVariableSource {
 	 * @return string with replaced variable references, if variables was found. 
 	 * @see #VariableResolver(VariableSource...)
 	 */
-	public String replaceVariables(String string) {
+	@Override
+	public String resolveStringValue(String string) {
 		if (string == null) return null;
 		if (string.indexOf('$') == -1) return string;
 
@@ -91,6 +94,14 @@ public final class VariableResolver implements ChangeableVariableSource {
 		m.appendTail(sb);
 		
 		return sb.toString();
+	}
+
+	/**
+	 * @deprecated Replaced by {@link #resolveStringValue(String)}
+	 */
+	@Deprecated
+	public String replaceVariables(String string) {
+		return resolveStringValue(string);
 	}
 	
 	private String resolveValueWithTracing(String variableName) {
@@ -138,7 +149,7 @@ public final class VariableResolver implements ChangeableVariableSource {
 	}
 	
 	public String resolveValue(String varialeName, String defaultValue) {
-		return replaceVariables(getRawValue(replaceVariables(varialeName), defaultValue));
+		return resolveStringValue(getRawValue(resolveStringValue(varialeName), defaultValue));
 	}
 	
 	/**
@@ -150,14 +161,14 @@ public final class VariableResolver implements ChangeableVariableSource {
 		Map<String, String> result = new HashMap<String, String>(map.size());
 		
 		for(Map.Entry<String, String> entry : map.entrySet())
-			result.put(entry.getKey(), replaceVariables(entry.getValue()));
+			result.put(entry.getKey(), resolveStringValue(entry.getValue()));
 		
 		return result;
 	}
 	
 	public Map<String, String> resolveAndReplaceValues(Map<String, String> map) {
 		for(Map.Entry<String, String> entry : map.entrySet())
-			map.put(entry.getKey(), replaceVariables(entry.getValue()));
+			map.put(entry.getKey(), resolveStringValue(entry.getValue()));
 		return map;
 	}
 
@@ -168,13 +179,13 @@ public final class VariableResolver implements ChangeableVariableSource {
 	 */
 	public List<String> resolveItems(Collection<String> collection) {
 		List<String> result = new ArrayList<String>(collection.size());
-		for(String item : collection) result.add(replaceVariables(item));
+		for(String item : collection) result.add(resolveStringValue(item));
 		return result;
 	}
 	
 	public void resolveAndReplaceItems(Collection<String> collection) {
 		Collection<String> aux = new ArrayList<String>(collection.size());
-		for(String item : collection) aux.add(replaceVariables(item));
+		for(String item : collection) aux.add(resolveStringValue(item));
 		
 		collection.clear();
 		collection.addAll(aux);

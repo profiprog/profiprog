@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.util.StringValueResolver;
+
 public class LiveJavaProperties extends java.util.Properties implements LiveFile.FileLoader {
 	
-	private VariableResolver variables;
+	private StringValueResolver variables;
 	private LiveFile liveFile;
 	
-	public void setVariableResolver(VariableResolver variables) {
+	public void setVariableResolver(StringValueResolver variables) {
 		this.variables = variables;
 	}
 	
@@ -22,7 +24,7 @@ public class LiveJavaProperties extends java.util.Properties implements LiveFile
 	public String getProperty(String key) {
 		liveFile.checkChanges(this);
 		String result = super.getProperty(key);
-		return variables == null ? result : variables.replaceVariables(result);
+		return variables == null ? result : variables.resolveStringValue(result);
 	}
 	
 	@Override

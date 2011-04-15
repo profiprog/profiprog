@@ -13,13 +13,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringValueResolver;
 
 public class LiveFileHandler implements LiveFile {
 
 	private static final String DEFAULT_CHECK_PERIOD_SYSTEM_PROPERTY = "liveFile_defaultCheckPeriod";
 	private static final String DEVELOPMENT_MODE_SYSTEM_PROPERTY = "liveFile_developmentMode";
 	private static final String CLASSPATH_URL = "classpath:";
-	private VariableResolver variables;
+	private StringValueResolver variables;
 	private File file;
 	private String fileName;
 	private long lastChecked;
@@ -42,7 +43,7 @@ public class LiveFileHandler implements LiveFile {
 	/**
 	 * Enables substituting variables in values. Optional.
 	 */
-	public void setVariables(VariableResolver variables) {
+	public void setVariables(StringValueResolver variables) {
 		this.variables = variables;
 	}
 
@@ -82,7 +83,7 @@ public class LiveFileHandler implements LiveFile {
 	}
 
 	private String substituteVariables(String string) {
-		return variables == null ? string : variables.replaceVariables(string);
+		return variables == null ? string : variables.resolveStringValue(string);
 	}
 
 	@PostConstruct

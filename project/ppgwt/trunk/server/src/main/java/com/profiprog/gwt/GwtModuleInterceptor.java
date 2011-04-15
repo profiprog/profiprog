@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,10 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.profiprog.configinject.VariableResolver;
 import com.profiprog.gwt.conf.GwtModuleJsApi;
 import com.profiprog.gwt.conf.GwtModulePreferences;
 import com.profiprog.gwt.preload.GwtPreloadManager;
@@ -31,7 +31,7 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 
 	private GwtModuleBean gwtModuleBean;
 
-	private VariableResolver variables;
+	private StringValueResolver variables;
 
 	protected GwtPreloadManager preloadManager;
 
@@ -41,7 +41,7 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	@Autowired
-	public void setVariables(VariableResolver variables) {
+	public void setVariables(StringValueResolver variables) {
 		this.variables = variables;
 	}
 
@@ -99,7 +99,7 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 	}
 
 	private String substVariables(String str) {
-		return variables == null ? str : variables.replaceVariables(str);
+		return variables == null ? str : variables.resolveStringValue(str);
 	}
 
 	@Autowired(required=false)

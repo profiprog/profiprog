@@ -15,7 +15,7 @@ public class VariableResolverTest {
 		//"$$" is replaced by single '$'
 		//"$var" is evaluated to "val"
 		//"$" at end of line is ignored because there isn't valid variable name 
-		assertEquals("${$}var $var val $", tested.replaceVariables("${$}var $$var $var $"));
+		assertEquals("${$}var $var val $", tested.resolveStringValue("${$}var $$var $var $"));
 	}
 
 	@Test
@@ -27,22 +27,22 @@ public class VariableResolverTest {
 				throw new RuntimeException(MSG);
 			}
 		});
-		try { tested.replaceVariables("$a"); fail(); } catch (RuntimeException e) { assertEquals(MSG, e.getMessage()); }
-		try { tested.replaceVariables("$a"); fail(); } catch (RuntimeException e) { assertEquals(MSG, e.getMessage()); }
+		try { tested.resolveStringValue("$a"); fail(); } catch (RuntimeException e) { assertEquals(MSG, e.getMessage()); }
+		try { tested.resolveStringValue("$a"); fail(); } catch (RuntimeException e) { assertEquals(MSG, e.getMessage()); }
 	}
 
 	@Test
 	public void testNullValue() {
 		VariableResolver tested = new VariableResolver();
-		try { tested.replaceVariables("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
-		try { tested.replaceVariables("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
+		try { tested.resolveStringValue("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
+		try { tested.resolveStringValue("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
 	}
 	
 	@Test
 	public void testCircularSubstituion() {
 		VariableResolver tested = new VariableResolver(new MapVariableSource("a:a$b, b:b${c}b, c:$d, d:${e}d, e:$b"));
 		try {
-			tested.replaceVariables("$a");
+			tested.resolveStringValue("$a");
 			fail();
 		} catch (IllegalStateException e) {
 			assertEquals("Circular substitution a <- b* <- c <- d <- e <- b", e.getMessage());

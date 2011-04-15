@@ -8,8 +8,6 @@ import java.util.Set;
 
 import javax.servlet.ServletContext;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * Examples of variables provided by <code>this</code> implementation of {@link VariableSource}:<ul>
  * <li><code>${<b>{@value #CONTEXT_ROOT}</b>}</code> - returns <code>ServletContext.getRealPath("")</code>
@@ -49,10 +47,9 @@ public class ServletContextVariableSource implements VariableSource {
 	 */
 	private Map<String,String> mapping = Collections.emptyMap();
 	
-	private ServletContext servletContext;
+	private final ServletContext servletContext;
 	
-	@Autowired
-	public void setServletContext(ServletContext servletContext) {
+	public ServletContextVariableSource(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 	
