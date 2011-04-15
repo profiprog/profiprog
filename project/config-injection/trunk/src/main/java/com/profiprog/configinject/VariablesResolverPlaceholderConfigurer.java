@@ -8,6 +8,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionVisitor;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.core.SpringVersion;
 import org.springframework.util.StringValueResolver;
 
 public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostProcessor {
@@ -59,7 +60,8 @@ public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostPr
 
 		// New in Spring 3.0: resolve placeholders in embedded values such as
 		// annotation attributes.
-		beanFactory.addEmbeddedValueResolver(proxy);
+		if (!SpringVersion.getVersion().startsWith("2."))
+			beanFactory.addEmbeddedValueResolver(proxy);
 	}
 
 	private boolean isVariableSource(String beanClassName) throws ClassNotFoundException {
