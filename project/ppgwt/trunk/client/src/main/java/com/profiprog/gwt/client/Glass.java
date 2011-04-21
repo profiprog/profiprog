@@ -1,4 +1,4 @@
-package com.adaptiweb.gwt.framework;
+package com.profiprog.gwt.client;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -8,7 +8,6 @@ import com.google.gwt.user.client.Window.ScrollHandler;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 
-@Deprecated
 class Glass extends PopupPanel implements ResizeHandler, ScrollHandler {
 
 	private int showCounter = 0;

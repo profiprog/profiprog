@@ -1,6 +1,5 @@
-package com.adaptiweb.gwt.framework;
+package com.profiprog.gwt.client;
 
-@Deprecated
 public interface ElementIdentifier {
 	
 	String getElementId();

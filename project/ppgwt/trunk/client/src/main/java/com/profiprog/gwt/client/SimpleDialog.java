@@ -1,4 +1,4 @@
-package com.adaptiweb.gwt.framework;
+package com.profiprog.gwt.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,14 +16,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.profiprog.gwt.client.SimpleDialog;
 
-/**
- * Use {@link SimpleDialog}
- * @author milan
- */
-@Deprecated
-public class Dialog {
+public class SimpleDialog {
 	final private DialogBox dialogBox = new DialogBox(false, true);
 	final private static Glass glass = new Glass();
 	final private SimplePanel contentPanel = new SimplePanel();
@@ -116,7 +110,7 @@ public class Dialog {
 	protected void cleanUp() {
 	}
 
-	public Dialog(String title) {
+	public SimpleDialog(String title) {
 		dialogBox.setText(title);
 		VerticalPanel verticalPanel = new VerticalPanel();
 		verticalPanel.add(contentPanel);
@@ -148,7 +142,7 @@ public class Dialog {
 	}
 
 	public void wrapOpenDialogButton(ElementIdentifier elementId) {
-		Button.wrap(GwtGoodies.getElementById(elementId))
+		Button.wrap(ProfiProgGoodies.getElementById(elementId))
 		.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
