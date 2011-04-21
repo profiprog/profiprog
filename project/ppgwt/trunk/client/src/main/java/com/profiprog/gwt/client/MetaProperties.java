@@ -1,4 +1,4 @@
-package com.adaptiweb.gwt.util;
+package com.profiprog.gwt.client;
 
 import java.util.HashMap;
 
@@ -8,7 +8,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.MetaElement;
 import com.google.gwt.dom.client.NodeList;
 
-@Deprecated
 public class MetaProperties extends HashMap<String, String> {
 
 	private MetaProperties(String prefix) {

@@ -13,11 +13,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 
 public abstract class Wizard extends SimpleDialog {
 
-	interface WizardStep extends IsWidget, HasValueChangeHandlers<Boolean> {
+	public interface WizardStep extends IsWidget, HasValueChangeHandlers<Boolean> {
 		boolean isValid();
 	}
 
-	interface IsWizardStep {
+	public interface IsWizardStep {
 		WizardStep asWizardStep();
 	}
 
@@ -108,7 +108,7 @@ public abstract class Wizard extends SimpleDialog {
 		cleanUp();
 	}
 
-	abstract void apply();
+	protected abstract void apply();
 
 	@Override
 	public void show() {

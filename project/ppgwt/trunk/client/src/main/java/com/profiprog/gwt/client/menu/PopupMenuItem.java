@@ -1,4 +1,4 @@
-package com.adaptiweb.gwt.widget.menu;
+package com.profiprog.gwt.client.menu;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Image;
 
-@Deprecated
 class PopupMenuItem extends Composite implements MenuRegistration {
 
 	interface PopupMenuItemUiBinder extends UiBinder<FocusPanel, PopupMenuItem> {}

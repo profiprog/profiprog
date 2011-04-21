@@ -1,8 +1,7 @@
-package com.adaptiweb.gwt.widget.menu;
+package com.profiprog.gwt.client.menu;
 
 import com.google.gwt.resources.client.ImageResource;
 
-@Deprecated
 public interface MenuRegistration {
 
 	boolean isVisible();

@@ -1,6 +1,5 @@
-package com.adaptiweb.gwt.widget.menu;
+package com.profiprog.gwt.client.menu;
 
-@Deprecated
 public interface MenuPerformHandler {
 
 	void onMenuPerform(MenuRegistration menu);
