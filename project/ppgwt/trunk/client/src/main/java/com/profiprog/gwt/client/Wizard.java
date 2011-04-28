@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public abstract class Wizard extends SimpleDialog {
 
@@ -25,6 +26,7 @@ public abstract class Wizard extends SimpleDialog {
 	private int currentStep = -1;
 	private IsWizardStep[] steps;
 	private SimplePanel simplePanel;
+	private String currentStepTitle;
 	private Button prev;
 	private Button next;
 	private Button apply;
@@ -39,6 +41,13 @@ public abstract class Wizard extends SimpleDialog {
 		}
 	};
 
+	/**
+	 * @param titleBase prefix for title of active step.
+	 * 
+	 * <b>Note:</b> titleBase can contains two of characters '#'
+	 * where first one will be replaced by number of current step
+	 * and second one will be replaced by count of all steps.
+	 */
 	public Wizard(String titleBase) {
 		super(titleBase);
 		this.titleBase = titleBase;
@@ -56,7 +65,8 @@ public abstract class Wizard extends SimpleDialog {
 
 	@Override
 	public void setTitle(String title) {
-		super.setTitle(titleBase + " - " + title);
+		String base = titleBase.replaceFirst("#", String.valueOf(currentStep + 1)).replaceFirst("#", String.valueOf(steps.length));
+		super.setTitle(base + title);
 	}
 
 	public void setWizardSteps(IsWizardStep[] builderSteps) {
@@ -66,12 +76,18 @@ public abstract class Wizard extends SimpleDialog {
 	private void setStep(int step) {
 		if (currentStep == step) return;
 		if (buttonEnablerRegistration != null) buttonEnablerRegistration.removeHandler();
-		simplePanel.setWidget(steps[currentStep = step].asWizardStep());
+
+		if (currentStep != -1) steps[currentStep].asWizardStep().asWidget().setTitle(currentStepTitle);
+		Widget widget = steps[currentStep = step].asWizardStep().asWidget();
+		simplePanel.setWidget(widget);
+		
 		prev.setEnabled(currentStep > 0);
 		next.setEnabled(currentStep + 1 < steps.length && steps[currentStep].asWizardStep().isValid());
 		apply.setEnabled(currentStep + 1 == steps.length && steps[currentStep].asWizardStep().isValid());
 		buttonEnablerRegistration = steps[currentStep].asWizardStep().addValueChangeHandler(buttonEnabler);
-		setTitle(simplePanel.getWidget().getTitle());
+		
+		setTitle(currentStepTitle = widget.getTitle());
+		widget.setTitle(null);
 	}
 
 	@Override
