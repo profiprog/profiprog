@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 
@@ -23,9 +24,9 @@ public class LiveFileHandler implements LiveFile {
 	private StringValueResolver variables;
 	private File file;
 	private String fileName;
-	private long lastChecked;
 	private long changesCheckPeriod = 2 * 60 * 1000; //default 2 minutes
-	private long lastChanged;
+	private final AtomicLong lastChecked = new AtomicLong(0L);
+	private final AtomicLong lastChanged = new AtomicLong(0L);
 	private String templateResource;
 	private boolean developmentMode = false;
 
@@ -54,6 +55,10 @@ public class LiveFileHandler implements LiveFile {
 	public void setChangesCheckPeriod(int changesCheckPeriod) {
 		this.changesCheckPeriod = changesCheckPeriod * 1000L;
 	}
+	
+	public int getChangesCheckPeriod() {
+		return (int) (changesCheckPeriod / 1000L);
+	}
 
 	/**
 	 * Enable auto creating missing file during initialization. Optional.
@@ -64,16 +69,18 @@ public class LiveFileHandler implements LiveFile {
 
 	public void checkChanges(FileLoader loader) {
 		long currentTime = System.currentTimeMillis();
+		long lastChecked = this.lastChecked.get();
 		if (currentTime - lastChecked < changesCheckPeriod) return;
-		lastChecked = currentTime;
+		if (!this.lastChecked.compareAndSet(lastChecked, currentTime)) return;
 
 		File file = getFile();
 
 		long changedTime = file.lastModified();
+		long lastChanged = this.lastChanged.get();
 		if (changedTime == lastChanged) return;
 		if (changedTime == 0 && templateResource != null && !file.exists())
-			createDefaultFile(substituteVariables(templateResource), file);
-		lastChanged = changedTime;
+			changedTime = createDefaultFile(substituteVariables(templateResource), file);
+		this.lastChanged.set(changedTime);
 
 		try {
 			loader.loadFile(file);
@@ -119,7 +126,7 @@ public class LiveFileHandler implements LiveFile {
 		}
 	}
 
-	public static void createDefaultFile(String templateResource, File file) {
+	public static long createDefaultFile(String templateResource, File file) {
 		InputStream is = null;
 		OutputStream os = null;
 		try {
@@ -139,5 +146,6 @@ public class LiveFileHandler implements LiveFile {
 			IOUtils.closeQuietly(is);
 			IOUtils.closeQuietly(os);
 		}
+		return file.lastModified();
 	}
 }

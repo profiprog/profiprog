@@ -4,10 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
 import com.profiprog.configinject.LiveFile.FileLoader;
 
@@ -19,7 +23,17 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	private final LiveFileHandler fileHandler = new LiveFileHandler();
 
 	private VariableSourceChangeHandler changeHandler;
-
+	private TaskScheduler taskScheduler;
+	private Trigger trigger;
+	
+	public void setTrigger(Trigger trigger) {
+		this.trigger = trigger;
+	}
+	
+	public void setTaskScheduler(TaskScheduler taskScheduler) {
+		this.taskScheduler = taskScheduler;
+	}
+	
 	public void setPropertyFileName(String fileName) {
 		fileHandler.setPropertyFile(fileName);
 	}
@@ -30,8 +44,7 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	
 	@Override
 	public String getRawValue(String variableName) throws NullPointerException {
-		fileHandler.checkChanges(this);
-		return properties.get().getProperty(variableName);
+		return getProperties().getProperty(variableName);
 	}
 	
 	public void setCheckPeriodInSeconds(int seconds) {
@@ -50,10 +63,29 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	public void initSource(VariableResolver variables) throws IOException {
 		fileHandler.setVariables(variables);
 		fileHandler.checkChanges(this);
+		if (taskScheduler != null) {
+			if (trigger == null) trigger = createDefaultTrigger();
+			taskScheduler.schedule(createCheckChangesTask(), trigger);
+		}
+	}
+
+	private PeriodicTrigger createDefaultTrigger() {
+		PeriodicTrigger trigger = new PeriodicTrigger(fileHandler.getChangesCheckPeriod(), TimeUnit.SECONDS);
+		trigger.setInitialDelay(fileHandler.getChangesCheckPeriod());
+		return trigger;
 	}
 	
+	private Runnable createCheckChangesTask() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				fileHandler.checkChanges(PropertyFileVariableSource.this);
+			}
+		};
+	}
+
 	public Properties getProperties() {
-		fileHandler.checkChanges(this);
+		if (taskScheduler == null) fileHandler.checkChanges(this);
 		return properties.get();
 	}
 	
