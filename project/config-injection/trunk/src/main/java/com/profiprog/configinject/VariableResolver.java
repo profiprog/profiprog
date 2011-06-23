@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringValueResolver;
 
 /**
@@ -18,6 +20,8 @@ import org.springframework.util.StringValueResolver;
  * multi variable sources in one.
  */
 public final class VariableResolver implements ChangeableVariableSource, StringValueResolver {
+	
+	private static final Logger logger = LoggerFactory.getLogger(VariableResolver.class);
 
 	private final VariableSource[] sources;
 	
@@ -85,11 +89,15 @@ public final class VariableResolver implements ChangeableVariableSource, StringV
 		Matcher m = VARIABLE_REFERENCE_PATTERN.matcher(string);
 		
 		while (m.find()) {
-			String variableName = m.group(m.group(1) == null ? 2 : 1);
+			boolean hasCurlyBrackets = m.group(1) == null;
+			String variableName = m.group(hasCurlyBrackets ? 2 : 1);
 			
 			String variableValue = "$".equals(variableName) ? "$" : resolveValueWithTracing(variableName);
-			if (variableValue == null) throw new IllegalStateException("Missing property " + variableName);
-			m.appendReplacement(sb, variableValue.replace("\\", "\\\\").replace("$", "\\$"));
+			if (variableValue == null) {
+				if (hasCurlyBrackets) throw new IllegalStateException("Missing property " + variableName);
+				else logger.warn("Could not resolve variable '{}' in string: {}", variableName, string);
+			}
+			else m.appendReplacement(sb, variableValue.replace("\\", "\\\\").replace("$", "\\$"));
 		}
 		m.appendTail(sb);
 		
