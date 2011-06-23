@@ -34,8 +34,8 @@ public class VariableResolverTest {
 	@Test
 	public void testNullValue() {
 		VariableResolver tested = new VariableResolver();
-		try { tested.resolveStringValue("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
-		try { tested.resolveStringValue("$a"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
+		try { tested.resolveStringValue("${a}"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
+		try { tested.resolveStringValue("${a}"); fail(); } catch (IllegalStateException e) { assertEquals("Missing property a", e.getMessage()); }
 	}
 	
 	@Test
