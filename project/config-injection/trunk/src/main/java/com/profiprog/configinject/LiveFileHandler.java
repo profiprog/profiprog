@@ -7,8 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.PostConstruct;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -17,28 +16,61 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringValueResolver;
 
 public class LiveFileHandler implements LiveFile {
+	
+	private static class FileRefenrece {
+		final String fileName;
+		final File file;
+		final AtomicLong lastChanged = new AtomicLong(0L);
+		
+		FileRefenrece(String fileName) {
+			this(new File(fileName), fileName);
+		}
+
+		public FileRefenrece(File file, String fileName) {
+			this.fileName = fileName;
+			this.file = file;
+		}
+	}
 
 	private static final String DEFAULT_CHECK_PERIOD_SYSTEM_PROPERTY = "liveFile_defaultCheckPeriod";
 	private static final String DEVELOPMENT_MODE_SYSTEM_PROPERTY = "liveFile_developmentMode";
 	private static final String CLASSPATH_URL = "classpath:";
 	private StringValueResolver variables;
-	private File file;
 	private String fileName;
 	private long changesCheckPeriod = 2 * 60 * 1000; //default 2 minutes
 	private final AtomicLong lastChecked = new AtomicLong(0L);
-	private final AtomicLong lastChanged = new AtomicLong(0L);
+	private final AtomicReference<FileRefenrece> fileReference = new AtomicReference<FileRefenrece>();
 	private String templateResource;
 	private boolean developmentMode = false;
+	protected final FileLoader loader;
+	private boolean fileNameChecking;
+	
+	@Deprecated
+	public LiveFileHandler() {
+		this(null);
+	}
 
-	public void setPropertyFile(String fileName) {
-		this.fileName = fileName;
-		this.file = null;
-
+	public LiveFileHandler(FileLoader loader) {
+		this.loader = loader;
+		
 		String changesCheckPeriod = System.getProperty(DEFAULT_CHECK_PERIOD_SYSTEM_PROPERTY);
 		if (changesCheckPeriod != null) setChangesCheckPeriod(Integer.parseInt(changesCheckPeriod));
 
 		String developmentMode = System.getProperty(DEVELOPMENT_MODE_SYSTEM_PROPERTY);
 		if (developmentMode != null) this.developmentMode = Boolean.parseBoolean(developmentMode);
+	}
+	
+	public void setFileNameChecking(boolean fileNameChecking) {
+		this.fileNameChecking = fileNameChecking;
+	}
+
+	public void setPropertyFile(String fileName) {
+		this.fileName = fileName;
+		this.fileReference.set(null);
+	}
+	
+	public File getFile() {
+		return getFileReference().file;
 	}
 
 	/**
@@ -67,66 +99,79 @@ public class LiveFileHandler implements LiveFile {
 		this.templateResource = templateResource;
 	}
 
+	public void checkChanges() {
+		checkChanges(loader);
+	}
+	
+	@Deprecated
 	public void checkChanges(FileLoader loader) {
+		if (isQuiteTime()) return;
+
+		FileRefenrece reference = getFileReference();
+
+		long lastChanged = reference.lastChanged.get();
+		long changedTime = reference.file.lastModified();
+		if (changedTime == 0 && templateResource != null && !reference.file.exists())
+			changedTime = createDefaultFile(reference.file);
+
+		if (changedTime != lastChanged && reference.lastChanged.compareAndSet(lastChanged, changedTime)) {
+			try {
+				loatFile(loader, reference.file);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	protected void loatFile(FileLoader loader, File file) throws IOException {
+		loader.loadFile(file);
+	}
+
+	private boolean isQuiteTime() {
 		long currentTime = System.currentTimeMillis();
 		long lastChecked = this.lastChecked.get();
-		if (currentTime - lastChecked < changesCheckPeriod) return;
-		if (!this.lastChecked.compareAndSet(lastChecked, currentTime)) return;
-
-		File file = getFile();
-
-		long changedTime = file.lastModified();
-		long lastChanged = this.lastChanged.get();
-		if (changedTime == lastChanged) return;
-		if (changedTime == 0 && templateResource != null && !file.exists())
-			changedTime = createDefaultFile(substituteVariables(templateResource), file);
-		this.lastChanged.set(changedTime);
-
-		try {
-			loader.loadFile(file);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		return currentTime - lastChecked < changesCheckPeriod || !this.lastChecked.compareAndSet(lastChecked, currentTime);
 	}
 
 	private String substituteVariables(String string) {
 		return variables == null ? string : variables.resolveStringValue(string);
 	}
 
-	@PostConstruct
-	public File getFile() {
-		if (file == null) {
-			if (fileName == null)
-				throw new IllegalStateException("Attribute 'propertyFile' wasn't initialized!");
-
-			file = new File(substituteVariables(fileName));
-
-			if (developmentMode) prepareDevelopmentMode();
-
-			if (!file.exists() && templateResource != null)
-				createDefaultFile(substituteVariables(templateResource), file);
+	private FileRefenrece getFileReference() {
+		if (this.fileName == null)
+			throw new IllegalStateException("Attribute 'propertyFile' wasn't initialized!");
+		
+		FileRefenrece reference = fileReference.get();
+		String fileName = fileNameChecking || reference == null ? substituteVariables(this.fileName) : null;
+		
+		if (reference == null || fileNameChecking && !fileName.equals(reference.fileName)) {
+			reference = prepareFileReference(fileName);
+			fileReference.set(reference);
 		}
-		return file;
+		return reference;
 	}
 
-	private void prepareDevelopmentMode() {
-		if (templateResource == null)  return;
-		File templateFile = resourceAsFile();
-		if (templateFile != null && templateFile.exists()) {
-			file = templateFile;
-			templateFile = null;
+	private FileRefenrece prepareFileReference(String fileName) {
+		if (developmentMode && templateResource != null) {
+			String templateName = substituteVariables(templateResource);
+			File templateFile = resourceAsFile(templateName);
+			if (templateFile != null && templateFile.exists()) {
+				return new FileRefenrece(templateFile, fileName);
+			}
 		}
+		return new FileRefenrece(fileName);
 	}
 
-	private File resourceAsFile() {
+	private File resourceAsFile(String fileName) {
 		try {
-			return ResourceUtils.getFile(substituteVariables(templateResource));
+			return ResourceUtils.getFile(fileName);
 		} catch (FileNotFoundException e) {
 			return null;
 		}
 	}
 
-	public static long createDefaultFile(String templateResource, File file) {
+	public long createDefaultFile(File file) {
+		String templateResource = substituteVariables(this.templateResource);
 		InputStream is = null;
 		OutputStream os = null;
 		try {

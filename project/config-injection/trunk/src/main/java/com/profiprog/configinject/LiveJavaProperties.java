@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.util.StringValueResolver;
 
+@Deprecated
 public class LiveJavaProperties extends java.util.Properties implements LiveFile.FileLoader {
 	
 	private StringValueResolver variables;

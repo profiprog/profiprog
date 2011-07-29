@@ -9,6 +9,8 @@ public interface LiveFile {
 		void loadFile(File file) throws IOException; 
 	}
 	
+	@Deprecated
 	void checkChanges(FileLoader loader);
 	
+	void checkChanges();
 }

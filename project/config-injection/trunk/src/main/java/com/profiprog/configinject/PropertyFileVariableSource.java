@@ -20,12 +20,16 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	private static final Logger logger = LoggerFactory.getLogger(PropertyFileVariableSource.class);
 	
 	private final AtomicReference<Properties> properties = new AtomicReference<Properties>();
-	private final LiveFileHandler fileHandler = new LiveFileHandler();
+	private final LiveFileHandler fileHandler = new LiveFileHandler(this);
 
 	private VariableSourceChangeHandler changeHandler;
 	private TaskScheduler taskScheduler;
 	private Trigger trigger;
 	
+	public void setFileNameChecking(boolean fileNameChecking) {
+		fileHandler.setFileNameChecking(fileNameChecking);
+	}
+
 	public void setTrigger(Trigger trigger) {
 		this.trigger = trigger;
 	}
@@ -62,7 +66,7 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 	@Override
 	public void initSource(VariableResolver variables) throws IOException {
 		fileHandler.setVariables(variables);
-		fileHandler.checkChanges(this);
+		fileHandler.checkChanges();
 		if (taskScheduler != null) {
 			if (trigger == null) trigger = createDefaultTrigger();
 			taskScheduler.schedule(createCheckChangesTask(), trigger);
@@ -79,13 +83,13 @@ public class PropertyFileVariableSource implements InicializableVariableSource, 
 		return new Runnable() {
 			@Override
 			public void run() {
-				fileHandler.checkChanges(PropertyFileVariableSource.this);
+				fileHandler.checkChanges();
 			}
 		};
 	}
 
 	public Properties getProperties() {
-		if (taskScheduler == null) fileHandler.checkChanges(this);
+		if (taskScheduler == null) fileHandler.checkChanges();
 		return properties.get();
 	}
 	
