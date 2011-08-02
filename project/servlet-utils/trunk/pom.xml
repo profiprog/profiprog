@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -8,7 +7,7 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>servlet-utils</artifactId>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 
 	<name>Servlet Utils</name>
@@ -18,9 +17,9 @@
 	</properties>
 
 	<scm>
-		<connection>scm:svn:${profiProgSVN}/project/servlet-utils/trunk</connection>
-		<developerConnection>scm:svn:${profiProgSVN}/project/servlet-utils/trunk</developerConnection>
-		<url>${profiProgSVN}/project/servlet-utils/trunk</url>
+		<connection>scm:svn:http://localhost/svn/profiprog/project/servlet-utils/tags/servlet-utils-1.1</connection>
+		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/servlet-utils/tags/servlet-utils-1.1</developerConnection>
+		<url>http://localhost/svn/profiprog/project/servlet-utils/tags/servlet-utils-1.1</url>
 	</scm>
 
 	<build>
