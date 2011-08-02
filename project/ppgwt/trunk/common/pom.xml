@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>ppgwt</artifactId>
 		<groupId>com.profiprog</groupId>
-		<version>1.1-SNAPSHOT</version>
+		<version>1.1</version>
 	</parent>
 	<artifactId>ppgwt-common</artifactId>
 	<name>ProfiProg GWT Common</name>
