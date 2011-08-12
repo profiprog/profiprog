@@ -11,6 +11,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +55,7 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 		if (modelAndView == null) return;
 
-		String contextPath = request.getContextPath();
-		String requestUri = request.getRequestURI().substring(contextPath.length());
-
+		String requestUri = resolveRequestUri(request);
 		Set<String> matchesModules = new TreeSet<String>();
 
 		for (Entry<String, GwtModulePreferences> module : modules.entrySet())
@@ -83,6 +82,19 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 				break;
 			}
 		}
+	}
+
+	private String resolveRequestUri(HttpServletRequest request) {
+		String contextPath = request.getContextPath();
+		String requestUri = request.getRequestURI().substring(contextPath.length());
+		HttpSession session = request.getSession(false);
+		if (session != null) {
+			String sesssionSufix = ";jsessionid=" + session.getId();
+			if (requestUri.endsWith(sesssionSufix)) {
+				requestUri = requestUri.substring(0, requestUri.length() - sesssionSufix.length());
+			}
+		}
+		return requestUri;
 	}
 
 	private List<String> prepareJsApis(String requestUri, String gwtModuleName) {
