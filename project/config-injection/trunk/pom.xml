@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>[2.5.6,3.0.99]</version>
+			<version>3.1.1.RELEASE</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
