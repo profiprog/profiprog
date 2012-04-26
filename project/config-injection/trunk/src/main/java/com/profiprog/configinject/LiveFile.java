@@ -6,11 +6,8 @@ import java.io.IOException;
 public interface LiveFile {
 	
 	interface FileLoader {
-		void loadFile(File file) throws IOException; 
+		void loadFile(File file) throws IOException;
 	}
-	
-	@Deprecated
-	void checkChanges(FileLoader loader);
-	
+
 	void checkChanges();
 }
