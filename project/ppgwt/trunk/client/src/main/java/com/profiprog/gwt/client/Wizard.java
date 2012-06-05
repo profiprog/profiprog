@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public abstract class Wizard extends SimpleDialog {
 
@@ -18,15 +17,24 @@ public abstract class Wizard extends SimpleDialog {
 		boolean isValid();
 	}
 
-	public interface IsWizardStep {
-		WizardStep asWizardStep();
-	}
+	public abstract class IsWizardStep {
+
+        public abstract WizardStep asWizardStep();
+
+        protected void leavingToPreviousStep(int nextStepIndex) {}
+
+        protected void leavingToNextStep(int nextStepIndex) {}
+
+        protected void enteringFromPreviousStep(int previousStepIndex) {}
+
+        protected void enteringFromNextStep(int previousStepIndex) {}
+    }
 
 	private String titleBase;
 	private int currentStep = -1;
 	private IsWizardStep[] steps;
+    private String[] titles;
 	private SimplePanel simplePanel;
-	private String currentStepTitle;
 	private Button prev;
 	private Button next;
 	private Button apply;
@@ -65,29 +73,41 @@ public abstract class Wizard extends SimpleDialog {
 
 	@Override
 	public void setTitle(String title) {
-		String base = titleBase.replaceFirst("#", String.valueOf(currentStep + 1)).replaceFirst("#", String.valueOf(steps.length));
-		super.setTitle(base + title);
+        if (titles[currentStep] == null) {
+            String base = titleBase
+                    .replaceFirst("#", String.valueOf(currentStep + 1))
+                    .replaceFirst("#", String.valueOf(steps.length));
+            titles[currentStep] = base + title;
+        }
+		super.setTitle(titles[currentStep]);
 	}
 
 	public void setWizardSteps(IsWizardStep[] builderSteps) {
 		steps = builderSteps;
+        titles = new String[steps.length];
 	}
 
 	private void setStep(int step) {
 		if (currentStep == step) return;
 		if (buttonEnablerRegistration != null) buttonEnablerRegistration.removeHandler();
 
-		if (currentStep != -1) steps[currentStep].asWizardStep().asWidget().setTitle(currentStepTitle);
-		Widget widget = steps[currentStep = step].asWizardStep().asWidget();
-		simplePanel.setWidget(widget);
+		if (currentStep != -1) {
+            if (currentStep > step) steps[currentStep].leavingToPreviousStep(step);
+            else steps[currentStep].leavingToNextStep(step);
+        }
+
+        if (currentStep < step) steps[step].enteringFromPreviousStep(currentStep);
+        else steps[step].enteringFromNextStep(currentStep);
+
+        WizardStep wizardStep = steps[currentStep = step].asWizardStep();
+        simplePanel.setWidget(wizardStep.asWidget());
 		
 		prev.setEnabled(currentStep > 0);
-		next.setEnabled(currentStep + 1 < steps.length && steps[currentStep].asWizardStep().isValid());
-		apply.setEnabled(currentStep + 1 == steps.length && steps[currentStep].asWizardStep().isValid());
-		buttonEnablerRegistration = steps[currentStep].asWizardStep().addValueChangeHandler(buttonEnabler);
+		buttonEnablerRegistration = wizardStep.addValueChangeHandler(buttonEnabler);
+        buttonEnabler.onValueChange(new ValueChangeEvent<Boolean>(wizardStep.isValid()) {});
 		
-		setTitle(currentStepTitle = widget.getTitle());
-		widget.setTitle(null);
+		setTitle(simplePanel.getWidget().getTitle());
+        simplePanel.getWidget().setTitle(null);
 	}
 
 	@Override
