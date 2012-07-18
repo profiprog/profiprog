@@ -4,15 +4,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionVisitor;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.*;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.lang.reflect.Method;
 
 public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostProcessor {
 
 	private static final Logger logger = LoggerFactory.getLogger(VariablesResolverPlaceholderConfigurer.class);
+    private static final Method addEmbeddedValueResolverMethod = ReflectionUtils
+            .findMethod(ConfigurableBeanFactory.class, "addEmbeddedValueResolver", StringValueResolver.class);
 
 	private final VariableResolver variableResolver;
 
@@ -22,10 +24,10 @@ public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostPr
 			try {
 				String resolvedVal = variableResolver.resolveStringValue(strVal);
 				if (!strVal.equals(resolvedVal))
-					logger.info("Resolved values: " + strVal + " -> " + resolvedVal);
+					logger.debug("Resolved values: " + strVal + " -> " + resolvedVal);
 				return resolvedVal;
 			} catch (RuntimeException e) {
-				logger.error("Unable to resolve values in: " + strVal, e);
+				logger.warn("Unable to resolve values in: " + strVal, e);
 				return strVal;
 			}
 		}
@@ -36,7 +38,7 @@ public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostPr
 	}
 
 	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(proxy);
 
 		String[] beanNames = beanFactory.getBeanDefinitionNames();
@@ -53,14 +55,12 @@ public class VariablesResolverPlaceholderConfigurer implements BeanFactoryPostPr
 			}
 		}
 
-		// New in Spring 2.5: resolve placeholders in alias target names and
-		// aliases as well.
+		// New in Spring 2.5: resolve placeholders in alias target names and aliases as well.
 		beanFactory.resolveAliases(proxy);
 
-		// New in Spring 3.0: resolve placeholders in embedded values such as
-		// annotation attributes.
-		//TODO enable this when spring version will be always > 2.5
-		//beanFactory.addEmbeddedValueResolver(proxy);
+		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
+        if (addEmbeddedValueResolverMethod != null)
+            ReflectionUtils.invokeMethod(addEmbeddedValueResolverMethod, beanFactory, proxy);
 	}
 
 	private boolean isVariableSource(String beanClassName) throws ClassNotFoundException {
