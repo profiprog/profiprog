@@ -8,13 +8,13 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>config-injection</artifactId>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.3</version>
 	<name>Config injection</name>
 
 	<scm>
-		<connection>scm:svn:http://profiprog.googlecode.com/svn/project/config-injection/trunk</connection>
-		<developerConnection>scm:svn:https://profiprog.googlecode.com/svn/project/config-injection/trunk</developerConnection>
-		<url>http://profiprog.googlecode.com/svn/project/config-injection/trunk</url>
+		<connection>scm:svn:http://localhost/svn/profiprog/project/config-injection/tags/config-injection-1.3</connection>
+		<developerConnection>scm:svn:http://localhost/svn/profiprog/project/config-injection/tags/config-injection-1.3</developerConnection>
+		<url>scm:svn:http://localhost/svn/profiprog/project/config-injection/tags/config-injection-1.3</url>
 	</scm>
 
 	<build>
