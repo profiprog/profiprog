@@ -8,7 +8,7 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>config-injection</artifactId>
-	<version>1.4-SNAPSHOT</version>
+	<version>1.3</version>
 	<name>Config injection</name>
 
 	<scm>
