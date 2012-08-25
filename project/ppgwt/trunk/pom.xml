@@ -86,7 +86,7 @@
 									<link>http://java.sun.com/j2se/1.5.0/docs/api</link>
 								</links>
 								<stylesheet>maven</stylesheet>
-								<javadocDirectory>${base}/src/main/javadoc</javadocDirectory>
+								<javadocDirectory>${basedir}/src/main/javadoc</javadocDirectory>
 							</configuration>
 							<reportSets>
 								<reportSet>

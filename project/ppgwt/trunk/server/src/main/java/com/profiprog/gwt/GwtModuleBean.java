@@ -53,33 +53,33 @@ public class GwtModuleBean {
 		return buff.toString();
 	}
 
-	private void appendLocale(StringBuilder buff) {
+    protected void appendLocale(StringBuilder buff) {
 		appendNewLine(buff);
 		buff.append("<meta name=\"gwt:property\" content=\"locale=").append(getLocale()).append("\" />");
 	}
 
-	private void appendClientProperties(StringBuilder buff) {
+    protected void appendClientProperties(StringBuilder buff) {
 		for (Entry<String,String> p : getClientProperties().entrySet()) {
 			appendNewLine(buff);
 			buff.append("<meta name=\"client:").append(p.getKey()).append("\" content=\"").append(p.getValue()).append("\" />");
 		}
 	}
 
-	private void appendJsApis(StringBuilder buff) {
+    protected void appendJsApis(StringBuilder buff) {
 		for (String url : getJsApis()) {
 			appendNewLine(buff);
 			buff.append("<script language=\"javascript\" src=\"").append(url).append("\"></script>");
 		}
 	}
 
-	private void appendBootScript(StringBuilder buff) {
+    protected void appendBootScript(StringBuilder buff) {
 		appendNewLine(buff);
 		buff.append("<script language=\"javascript\" src=\"");
 		buff.append(getContextPath()).append('/').append(getName()).append('/').append(getName());
 		buff.append(".nocache.js\"></script>");
 	}
 
-	private void appendSerializedObjects(StringBuilder buff) {
+	protected void appendSerializedObjects(StringBuilder buff) {
 		Map<String, String> serializedObjects = getSerializedObjects();
 		if (!serializedObjects.isEmpty()) {
 			appendNewLine(buff);
@@ -87,7 +87,10 @@ public class GwtModuleBean {
 
 			for (Entry<String,String> o : serializedObjects.entrySet()) {
 				appendNewLine(buff);
-				String value = o.getValue().replace("'", "\\'").replace("</script>", "</' + 'script>");
+				String value = o.getValue()
+                        .replace("\\", "\\\\") // escape escapes
+                        .replace("'", "\\'")
+                        .replace("</script>", "</' + 'script>");
 				buff.append("var ").append(o.getKey()).append("='").append(value).append("';");
 			}
 
@@ -96,11 +99,11 @@ public class GwtModuleBean {
 		}
 	}
 
-	private void appendNewLine(StringBuilder buff) {
+    protected final void appendNewLine(StringBuilder buff) {
 		if (buff.length() > 0) buff.append("\n\t");
 	}
 
-	private void appendHistoryFrame(StringBuilder buff) {
+    protected void appendHistoryFrame(StringBuilder buff) {
 		appendNewLine(buff);
 		buff.append("<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
 	}
