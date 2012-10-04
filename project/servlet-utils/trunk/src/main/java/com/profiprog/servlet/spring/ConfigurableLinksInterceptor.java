@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -65,8 +66,9 @@ import com.profiprog.configinject.jses.VariableSourceChangedEventHandler;
  * TODO document ability for change links definition in runtime  
  *
  */
-public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter implements VariableSourceChangedEventHandler {
+public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter implements VariableSourceChangedEventHandler, InitializingBean {
 
+	@SuppressWarnings("serial")
 	public static class LinkData extends LinkedHashMap<String, String> {
 
 		public LinkData(String url, String text) {
@@ -101,6 +103,8 @@ public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter impl
 	private static final String DEFAULT_PROPERTY_BASENAME = "externalLinks";
 
 	private final String propertyBasename;
+	private VariableResolver variableResolver;
+	private boolean cacheOn = true;
 
 	private List<Object> links = Collections.emptyList();
 	
@@ -108,34 +112,47 @@ public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter impl
 		this(DEFAULT_PROPERTY_BASENAME);
 	}
 	
+	@Autowired
+	public void setVariableResolver(VariableResolver variableResolver) {
+		this.variableResolver = variableResolver;
+	}
+	
+	public void setCacheOn(boolean cacheOn) {
+		this.cacheOn = cacheOn;
+	}
+	
 	public ConfigurableLinksInterceptor(String propertyBasename) {
 		this.propertyBasename = propertyBasename;
 	}
+	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (cacheOn) links = loadLinks();
+	}
 
-	@Autowired
-	public void loadLinks(VariableResolver variables) {
-		String list = variables.resolveValue(propertyBasename, "");
+	public List<Object> loadLinks() {
+		String list = variableResolver.resolveValue(propertyBasename, "");
 
 		List<Object> links = new ArrayList<Object>();
 		for (String item : list.split("\\s*,\\s*"))
 			if (item.length() > 0) {
-				String url = variables.resolveValue(propertyBasename + "." + item + ".url");
+				String url = variableResolver.resolveValue(propertyBasename + "." + item + ".url");
 				if (url == null) {
 					logger.warn(MISSING_URL_MSG, params(item, propertyBasename, item));
 					continue;
 				}
 
-				String text = variables.resolveValue(propertyBasename + "." + item, item);
+				String text = variableResolver.resolveValue(propertyBasename + "." + item, item);
 
 				LinkData link = new LinkData(url, text);
 				for (String attribute : OPTIONAL_ATTRIBUTES) {
-					String value = variables.resolveValue(propertyBasename + "." + item + "." + attribute);
+					String value = variableResolver.resolveValue(propertyBasename + "." + item + "." + attribute);
 					if (value != null)
 						link.put(attribute, value);
 				}
-				links.add(Collections.unmodifiableMap(link));
+				links.add(cacheOn ? Collections.unmodifiableMap(link) : link);
 			}
-		this.links = Collections.unmodifiableList(links);
+		return cacheOn ? Collections.unmodifiableList(links) : links;
 	}
 
 	private static Object[] params(Object...params) {
@@ -146,12 +163,13 @@ public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter impl
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 		if (modelAndView == null) return;
 		assert modelAndView.getModel().get(propertyBasename) == null : "Links provided by controller aren't supported yet.";
-		modelAndView.getModel().put(propertyBasename, links);
+		modelAndView.getModel().put(propertyBasename, cacheOn ? links : loadLinks());
 	}
 
 	@Override
 	public void onPropertyFileChanged(VariableSourceChangedEvent event) {
+		if (!cacheOn) return;
 		logger.info("RELOADING LINKS");
-		loadLinks(event.getVariables());
+		links = loadLinks();
 	}
 }
