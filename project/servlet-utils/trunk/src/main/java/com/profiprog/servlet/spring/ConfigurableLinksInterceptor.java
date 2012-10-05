@@ -102,7 +102,7 @@ public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter impl
 
 	private static final String DEFAULT_PROPERTY_BASENAME = "externalLinks";
 
-	private final String propertyBasename;
+	private String propertyBasename;
 	private VariableResolver variableResolver;
 	private boolean cacheOn = true;
 
@@ -121,8 +121,16 @@ public class ConfigurableLinksInterceptor extends HandlerInterceptorAdapter impl
 		this.cacheOn = cacheOn;
 	}
 	
-	public ConfigurableLinksInterceptor(String propertyBasename) {
+	public void setPropertyBasename(String propertyBasename) {
 		this.propertyBasename = propertyBasename;
+	}
+	
+	/**
+	 * @deprecated since 1.2 use {@link #setPropertyBasename(String)} instead
+	 * @param propertyBasename
+	 */
+	public ConfigurableLinksInterceptor(String propertyBasename) {
+		setPropertyBasename(propertyBasename);
 	}
 	
 	@Override
