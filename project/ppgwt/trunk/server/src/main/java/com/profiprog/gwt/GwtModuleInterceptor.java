@@ -87,13 +87,8 @@ public class GwtModuleInterceptor extends HandlerInterceptorAdapter {
 	private String resolveRequestUri(HttpServletRequest request) {
 		String contextPath = request.getContextPath();
 		String requestUri = request.getRequestURI().substring(contextPath.length());
-		HttpSession session = request.getSession(false);
-		if (session != null) {
-			String sesssionSufix = ";jsessionid=" + session.getId();
-			if (requestUri.endsWith(sesssionSufix)) {
-				requestUri = requestUri.substring(0, requestUri.length() - sesssionSufix.length());
-			}
-		}
+		int index = requestUri.indexOf(";jsessionid=");
+		if (index >= 0) requestUri = requestUri.substring(0, index);
 		return requestUri;
 	}
 
