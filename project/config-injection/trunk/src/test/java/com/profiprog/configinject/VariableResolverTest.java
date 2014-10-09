@@ -11,11 +11,17 @@ public class VariableResolverTest {
 	@Test
 	public void testReplaceDolar() {
 		VariableResolver tested = new VariableResolver(new MapVariableSource("var:val"));
-		//"${$}" is ignored - because '$' is not valid variable name
 		//"$$" is replaced by single '$'
+		//"${$}" is also replaced by single '$'
 		//"$var" is evaluated to "val"
 		//"$" at end of line is ignored because there isn't valid variable name 
-		assertEquals("${$}var $var val $", tested.resolveStringValue("${$}var $$var $var $"));
+		assertEquals("$var $var val $", tested.resolveStringValue("${$}var $$var $var $"));
+	}
+
+	@Test
+	public void testNestedReplacing() {
+		VariableResolver tested = new VariableResolver(new MapVariableSource("a:b,b:1,b1:45,c:48"));
+		assertEquals("b 45 48", tested.resolveStringValue("$a ${${a}${b}} ${${b1}:${c}}"));
 	}
 
 	@Test

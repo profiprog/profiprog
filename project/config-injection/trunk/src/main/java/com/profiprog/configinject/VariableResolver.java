@@ -1,18 +1,11 @@
 package com.profiprog.configinject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringValueResolver;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Provides method {@link #resolveStringValue(String)} for replacing variables in string.
@@ -31,27 +24,13 @@ public final class VariableResolver implements ChangeableVariableSource, StringV
 		new ThreadLocal<LinkedList<String>>() {
 			protected LinkedList<String> initialValue() {
 				return new LinkedList<String>();
-			};
+			}
 		};
 	
 	/**
-	 * Character class defines characters allowed in variable name.
-	 */
-	private static final String VARIABLE_NAME_CHARACTER_CLASE = "[\\w\\-\\.]";  
-	
-	/**
-	 * Pattern used for replacing variable references for its values in strings. 
-	 */
-	public static final Pattern VARIABLE_REFERENCE_PATTERN = Pattern.compile("\\$(?:" +
-			"(\\$|" + VARIABLE_NAME_CHARACTER_CLASE + "++)" +
-			"|" +
-			"\\{(" + VARIABLE_NAME_CHARACTER_CLASE + "++)\\}" +
-			")");
-
-	/**
 	 * Variable sources passed in this constructor are used for searching variables.
 	 * Searching is in same order as sources are. 
-	 * @param sources
+	 * @param sources ordered list of Variable sources (first sources can overshadow last sources)
 	 */
 	public VariableResolver(VariableSource... sources) {
 		this.sources = sources;
@@ -83,45 +62,23 @@ public final class VariableResolver implements ChangeableVariableSource, StringV
 	@Override
 	public String resolveStringValue(String string) {
 		if (string == null) return null;
-		if (string.indexOf('$') == -1) return string;
 
-		StringBuffer sb = new StringBuffer(string.length());
-		Matcher m = VARIABLE_REFERENCE_PATTERN.matcher(string);
-		
-		while (m.find()) {
-			boolean hasCurlyBrackets = m.group(1) == null;
-			String variableName = m.group(hasCurlyBrackets ? 2 : 1);
-			
-			String variableValue = "$".equals(variableName) ? "$" : resolveValueWithTracing(variableName);
-			if (variableValue == null) {
-				if (hasCurlyBrackets) throw new IllegalStateException("Missing property " + variableName);
-				else logger.warn("Could not resolve variable '{}' in string: {}", variableName, string);
-			}
-			else m.appendReplacement(sb, variableValue.replace("\\", "\\\\").replace("$", "\\$"));
-		}
+		VariableParser m = new VariableParser(string);
+		if (!m.find()) return string;
+
+		StringBuilder sb = new StringBuilder(string.length());
+		do {
+			String variableName = m.variableName();
+			String defaultValue = m.defaultValue();
+
+			String variableValue = "$".equals(variableName) ? "$" : resolveValue(variableName, defaultValue);
+			if (variableValue == null) throw new IllegalStateException("Missing property " + variableName);
+			else m.appendReplacement(sb, variableValue);
+
+		} while (m.find());
 		m.appendTail(sb);
 		
 		return sb.toString();
-	}
-
-	/**
-	 * @deprecated Replaced by {@link #resolveStringValue(String)}
-	 */
-	@Deprecated
-	public String replaceVariables(String string) {
-		return resolveStringValue(string);
-	}
-	
-	private String resolveValueWithTracing(String variableName) {
-		LinkedList<String> trace = evaluatingDynamicProperties.get();
-		if (trace.contains(variableName)) throw circularSubstitutionError(trace, variableName);
-		trace.addLast(variableName);
-		try {
-			return resolveValue(variableName);
-		} finally {
-			trace.removeLast();
-			if(trace.size() == 0) evaluatingDynamicProperties.remove();
-		}
 	}
 
 	private IllegalStateException circularSubstitutionError(LinkedList<String> trace, String key) {
@@ -135,34 +92,40 @@ public final class VariableResolver implements ChangeableVariableSource, StringV
 		return new IllegalStateException(sb.toString());
 	}
 
-	public String getRawValue(String variableName) {
-		return getRawValue(variableName, null);
-	}
-	
 	/**
 	 * Search value of variable specified by name.
-	 * Values are searched in variable sources defined in {@link #VariableResolver(VariableSource...) constructor}.  
-	 * @see sk.dvsk.common.utils.variable.VariableSource#getRawValue(java.lang.String)
+	 * Values are searched in variable sources defined in {@link #VariableResolver(VariableSource...) constructor}.
+	 * @see VariableSource#getRawValue(java.lang.String)
 	 */
-	public String getRawValue(String variableName, String defaultValue) {
+	public String getRawValue(String variableName) {
 		for(int i = initStatus; i < sources.length; i++) {
 			String variableValue = sources[i].getRawValue(variableName);
 			if(variableValue != null) return variableValue;
 		}
-		return defaultValue;
+		return null;
 	}
 	
-	public String resolveValue(String varialeName) {
-		return resolveValue(varialeName, null);
+	public String resolveValue(String variableName) {
+		return resolveValue(variableName, null);
 	}
 	
-	public String resolveValue(String varialeName, String defaultValue) {
-		return resolveStringValue(getRawValue(resolveStringValue(varialeName), defaultValue));
+	public String resolveValue(String variableName, String defaultValue) {
+		LinkedList<String> trace = evaluatingDynamicProperties.get();
+		if (trace.contains(variableName)) throw circularSubstitutionError(trace, variableName);
+		trace.addLast(variableName);
+		try {
+			String resolvedVariableName = resolveStringValue(variableName);
+			String rawValue = getRawValue(resolvedVariableName);
+			return rawValue != null ? resolveStringValue(rawValue) : resolveStringValue(defaultValue);
+		} finally {
+			trace.removeLast();
+			if(trace.size() == 0) evaluatingDynamicProperties.remove();
+		}
 	}
 	
 	/**
 	 * Resolve all variables in values of given map. 
-	 * @param map
+	 * @param map with values replaced
 	 * @return new map with resolved variables.
 	 */
 	public Map<String, String> resolveValues(Map<String, String> map) {
@@ -182,7 +145,7 @@ public final class VariableResolver implements ChangeableVariableSource, StringV
 
 	/**
 	 * Resolve all variables in keys and values of given map. 
-	 * @param collection
+	 * @param collection collection which can contains variables
 	 * @return new list with resolved variables.
 	 */
 	public List<String> resolveItems(Collection<String> collection) {
